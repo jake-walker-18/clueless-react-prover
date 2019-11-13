@@ -6,26 +6,31 @@ class App extends React.Component {
     name: "",
     username: "",
     password: "",
-    masterSecretID: ""
+    masterSecretID: "",
+    showQR: false
   };
 
   handleSubmit = async () => {
+    let { masterSecretID } = this.state;
+    let { name } = this.state;
+    let { password } = this.state;
+    let { username } = this.state;
     const url = `http://34.244.72.181:8080/prover-controller/credentials-for-default-proof?masterSecretId=${masterSecretID}&proverDID=${name}&proverWalletID=${password}&proverWalletKey=${username}`;
-    let res;
-    await fetch(url).then((response, error) => {
-      if (error) {
-        console.error(error);
-        alert("something went wrong, please try again");
-      } else {
-        console.log(response);
-        res = response;
-      }
-    });
-    return res;
+    await fetch(url).then(
+      (response = () => {
+        if (response.status == 200) {
+          console.log(response);
+          res = response;
+          this.setState({ showQR: true });
+        } else {
+          alert("unsuccessful");
+        }
+      })
+    );
   };
 
   render() {
-    return (
+    const loginPage = (
       <View style={styles.container}>
         <Text>Open up App.js to start working on your app!</Text>
         <TextInput
@@ -56,6 +61,14 @@ class App extends React.Component {
         <Button title="Log in" onPress={this.handleSubmit}></Button>
       </View>
     );
+
+    const qrPage = (
+      <View style={styles.container}>
+        <Text>Button pressed!</Text>
+      </View>
+    );
+
+    return this.state.showQR ? qrPage : loginPage;
   }
 }
 
