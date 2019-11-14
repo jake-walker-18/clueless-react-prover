@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import QRCode from "react-native-qrcode";
 
 class App extends React.Component {
   state = {
@@ -7,26 +8,24 @@ class App extends React.Component {
     username: "",
     password: "",
     masterSecretID: "",
-    showQR: false
+    showQR: false,
+    qrValue: ""
   };
 
   handleSubmit = async () => {
-    let { masterSecretID } = this.state;
-    let { name } = this.state;
-    let { password } = this.state;
-    let { username } = this.state;
-    const url = `http://34.244.72.181:8080/prover-controller/credentials-for-default-proof?masterSecretId=${masterSecretID}&proverDID=${name}&proverWalletID=${password}&proverWalletKey=${username}`;
-    await fetch(url).then(
-      (response = () => {
-        if (response.status == 200) {
-          console.log(response);
-          res = response;
-          this.setState({ showQR: true });
-        } else {
-          alert("unsuccessful");
-        }
-      })
-    );
+    let { masterSecretID } = this.state.masterSecretID;
+    let { name } = this.state.name;
+    let { password } = this.state.password;
+    let { username } = this.state.username;
+    const url = `http://34.244.72.181:8080/credentials-for-default-proof?masterSecretId=${masterSecretID}&proverDID=${name}&proverWalletID=${username}&proverWalletKey=${password}`;
+    await fetch(url)
+      .then(response => response.json())
+      .then(response => {
+        console.log(response);
+        let json = JSON.stringify(response);
+        this.setState({ qrValue: json });
+        this.setState({ showQR: true });
+      });
   };
 
   render() {
@@ -58,13 +57,14 @@ class App extends React.Component {
           placeholder="master secret id"
           onChangeText={masterSecretID => this.setState({ masterSecretID })}
         />
-        <Button title="Log in" onPress={this.handleSubmit}></Button>
+        <Button title="log in" onPress={this.handleSubmit}></Button>
       </View>
     );
 
     const qrPage = (
       <View style={styles.container}>
-        <Text>Button pressed!</Text>
+        <Text>A qr code somewhere</Text>
+        <QRCode value={this.state.qrValue} size={200} />
       </View>
     );
 
