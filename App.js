@@ -14,7 +14,7 @@ class App extends React.Component {
     hasCameraPermissions: null,
     showQRScanner: false,
     scanned: undefined,
-    data: "",
+    proofData: undefined,
     showQR: false,
     showLicenseSelection: false,
     qrValue: "",
@@ -28,9 +28,19 @@ class App extends React.Component {
   };
 
   getProof = async () => {
-    let { password, username, masterSecretID, proofType } = this.state;
+    let {
+      password,
+      username,
+      masterSecretID,
+      proofType,
+      proofData
+    } = this.state;
+    let schemaID = proofData.schemaID;
+    let credDefID = proofData.credDefID;
     console.log(username);
-    const url = `http://34.244.72.181:8080/credentials-for-proof?masterSecretId=${masterSecretID}&proofType=${proofType}&proverWalletID=${username}&proverWalletKey=${password}`;
+    const url = `http://34.244.72.181:8080/credentials-for-proof?masterSecretId=
+				${masterSecretID}&proofType=${proofType}&proverWalletID=${username}
+				&proverWalletKey=${password}&schemaID=${schemaID}&credDefID=${credDefID}`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
@@ -128,7 +138,7 @@ class App extends React.Component {
             this.state.scanned
               ? undefined
               : ({ data }) => {
-                  this.setState({ data: data, scanned: true });
+                  this.setState({ proofData: data, scanned: true });
                 }
           }
           style={StyleSheet.absoluteFillObject}
