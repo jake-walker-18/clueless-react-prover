@@ -28,19 +28,14 @@ class App extends React.Component {
   };
 
   getProof = async () => {
-    let {
-      password,
-      username,
-      masterSecretID,
-      proofType,
-      proofData
-    } = this.state;
+    let { password, username, masterSecretID, proofData, name } = this.state;
+    let proofType = proofData.proofType;
     let schemaID = proofData.schemaID;
     let credDefID = proofData.credDefID;
     console.log(username);
     const url = `http://34.244.72.181:8080/credentials-for-proof?masterSecretId=
-				${masterSecretID}&proofType=${proofType}&proverWalletID=${username}
-				&proverWalletKey=${password}&schemaID=${schemaID}&credDefID=${credDefID}`;
+				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proofType=${proofType}
+        &proverWalletKey=${password}&schemaID=${schemaID}&credDefID=${credDefID}`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
@@ -98,6 +93,12 @@ class App extends React.Component {
             placeholder="wallet key"
             secureTextEntry={true}
             onChangeText={password => this.setState({ password })}
+          />
+          <TextInput
+            style={styles.logincontainer}
+            value={this.state.name}
+            placeholder="DID"
+            onChangeText={name => this.setState({ name })}
           />
           <Button
             title="log in"
