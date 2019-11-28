@@ -7,7 +7,7 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 
 class App extends React.Component {
   state = {
-    name: "",
+    name: "GcytQUaaFE728WrKitXh63",
     username: "",
     password: "",
     masterSecretID: "",
@@ -29,18 +29,19 @@ class App extends React.Component {
 
   getProof = async () => {
     let { password, username, masterSecretID, proofData, name } = this.state;
-    let proofType = proofData.proofType;
-    let schemaID = proofData.schemaID;
-    let credDefID = proofData.credDefID;
-    console.log(username);
-    const url = `http://34.244.72.181:8080/credentials-for-proof?masterSecretId=
-				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proofType=${proofType}
-        &proverWalletKey=${password}&schemaID=${schemaID}&credDefID=${credDefID}`;
+    let proofjson = JSON.parse(proofData);
+    let proofType = proofjson.proofType;
+    proofType = proofType.trim();
+    let schemaID = proofjson.schemaID;
+    schemaID = schemaID.trim();
+    const url = `http://146.169.149.65:8080/credentials-for-default-proof?masterSecretId=
+				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proof=${proofType}
+        &proverWalletKey=${password}&schemaId=${schemaID}`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
-        console.log(response);
         let json = JSON.stringify(response);
+        this.setState({ scanned: false });
         console.log(json);
         this.setState({ qrValue: json });
         this.setState({ showQR: true });
@@ -51,7 +52,7 @@ class App extends React.Component {
 
   authenticateWallet = async () => {
     let { username, password } = this.state;
-    const url = `http://34.244.72.181:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
+    const url = `http://146.169.149.65:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
@@ -93,12 +94,6 @@ class App extends React.Component {
             placeholder="wallet key"
             secureTextEntry={true}
             onChangeText={password => this.setState({ password })}
-          />
-          <TextInput
-            style={styles.logincontainer}
-            value={this.state.name}
-            placeholder="DID"
-            onChangeText={name => this.setState({ name })}
           />
           <Button
             title="log in"
