@@ -7,7 +7,7 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 
 class App extends React.Component {
   state = {
-    name: "",
+    name: "GcytQUaaFE728WrKitXh63",
     username: "",
     password: "",
     masterSecretID: "",
@@ -28,24 +28,21 @@ class App extends React.Component {
   };
 
   getProof = async () => {
-    let {
-      password,
-      username,
-      masterSecretID,
-      proofType,
-      proofData
-    } = this.state;
-    let schemaID = proofData.schemaID;
-    let credDefID = proofData.credDefID;
-    console.log(username);
-    const url = `http://34.244.72.181:8080/credentials-for-proof?masterSecretId=
-				${masterSecretID}&proofType=${proofType}&proverWalletID=${username}
-				&proverWalletKey=${password}&schemaID=${schemaID}&credDefID=${credDefID}`;
+    let { password, username, masterSecretID, proofData, name } = this.state;
+    let proofjson = JSON.parse(proofData);
+    let proofType = proofjson.proofType;
+    proofType = proofType.trim();
+    let schemaID = proofjson.schemaID;
+    schemaID = schemaID.trim();
+    const url = `http://146.169.149.65:8080/credentials-for-default-proof?masterSecretId=
+				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proof=${proofType}
+        &proverWalletKey=${password}&schemaId=${schemaID}`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
-        console.log(response);
         let json = JSON.stringify(response);
+        this.setState({ scanned: false });
+        console.log(json);
         this.setState({ qrValue: json });
         this.setState({ showQR: true });
         this.setState({ showQRScanner: false });
@@ -55,12 +52,17 @@ class App extends React.Component {
 
   authenticateWallet = async () => {
     let { username, password } = this.state;
-    const url = `http://34.244.72.181:8080/get-wallet?id=${username}&key=${password}`;
+    const url = `http://146.169.149.65:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
-        this.setState({ showQRScanner: true });
-        return JSON.stringify(response);
+        console.log(JSON.stringify(response));
+        if (response.status !== undefined) {
+          alert("could not log you in. please try again.");
+        } else {
+          this.setState({ showQRScanner: true });
+          return JSON.stringify(response);
+        }
       })
       .catch(err => alert(err));
   };
