@@ -46,6 +46,7 @@ class App extends React.Component {
       .then(response => {
         console.log(response);
         let json = JSON.stringify(response);
+        console.log(json);
         this.setState({ qrValue: json });
         this.setState({ showQR: true });
         this.setState({ showQRScanner: false });
@@ -55,12 +56,17 @@ class App extends React.Component {
 
   authenticateWallet = async () => {
     let { username, password } = this.state;
-    const url = `http://34.244.72.181:8080/get-wallet?id=${username}&key=${password}`;
+    const url = `http://34.244.72.181:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
-        this.setState({ showQRScanner: true });
-        return JSON.stringify(response);
+        console.log(JSON.stringify(response));
+        if (response.status !== undefined) {
+          alert("could not log you in. please try again.");
+        } else {
+          this.setState({ showQRScanner: true });
+          return JSON.stringify(response);
+        }
       })
       .catch(err => alert(err));
   };
