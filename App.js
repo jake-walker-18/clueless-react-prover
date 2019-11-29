@@ -34,7 +34,7 @@ class App extends React.Component {
     proofType = proofType.trim();
     let schemaID = proofjson.schemaID;
     schemaID = schemaID.trim();
-    const url = `http://146.169.149.65:8080/credentials-for-default-proof?masterSecretId=
+    const url = `http://34.244.72.181:8080/credentials-for-default-proof?masterSecretId=
 				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proof=${proofType}
         &proverWalletKey=${password}&schemaId=${schemaID}`;
     await fetch(url)
@@ -52,7 +52,7 @@ class App extends React.Component {
 
   authenticateWallet = async () => {
     let { username, password } = this.state;
-    const url = `http://146.169.149.65:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
+    const url = `http://34.244.72.181:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
