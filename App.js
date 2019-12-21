@@ -1,239 +1,29 @@
 import React from "react";
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
-import Modal, { ModalContent, ModalTitle } from "react-native-modals";
-import QRCode from "react-native-qrcode";
-import * as Permissions from "expo-permissions";
-import { BarCodeScanner } from "expo-barcode-scanner";
+import { createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 
-class App extends React.Component {
-  state = {
-    did: "",
-    username: "",
-    password: "",
-    masterSecretID: "",
-    hasCameraPermissions: null,
-    showQRScanner: false,
-    scanned: undefined,
-    proofData: undefined,
-    showQR: false,
-    showLicenseSelection: false,
-    qrValue: "",
-    licenseChoice: "",
-    proofType: ""
-  };
+import Login from "./Login";
+import DetailsScreen from "./DetailsScreen.js";
 
-  getPermissions = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({ hasCameraPermissions: status === "granted" });
-  };
+/* LOGIN ->  LICENSES -> SCHEMA -> PROOFS -> SHOW QR -> READER */
 
-  getProof = async () => {
-    let {
-      password,
-      username,
-      masterSecretID,
-      proofData,
-      did: name
-    } = this.state;
-    let proofjson = JSON.parse(proofData);
-    let proofType = proofjson.proofType;
-    proofType = proofType.trim();
-    let schemaID = proofjson.schemaID;
-    schemaID = schemaID.trim();
-    const url = `http://34.244.72.181:8080/credentials-for-default-proof?masterSecretId=
-				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proof=${proofType}
-        &proverWalletKey=${password}&schemaId=${schemaID}`;
-    await fetch(url)
-      .then(response => response.json())
-      .then(response => {
-        let json = JSON.stringify(response);
-        this.setState({ scanned: false });
-        console.log(json);
-        this.setState({ qrValue: json });
-        this.setState({ showQR: true });
-        this.setState({ showQRScanner: false });
-      })
-      .catch(err => console.log("Well that dint work.\n" + err));
-  };
-
-  authenticateWallet = async () => {
-    let { username, password } = this.state;
-    const url = `http://34.244.72.181:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
-    await fetch(url)
-      .then(response => response.json())
-      .then(response => {
-        console.log(JSON.stringify(response));
-        if (response.status !== undefined) {
-          alert("could not log you in. please try again.");
-        } else {
-          this.setState({ showQRScanner: true });
-          return JSON.stringify(response);
-        }
-      })
-      .catch(err => alert(err));
-  };
-
-  render() {
-    const loginPage = (
-      <View style={{ backgroundColor: "#333", flex: 1 }}>
-        <Text
-          style={{
-            fontWeight: "bold",
-            fontSize: 20,
-            color: "#fff",
-            marginLeft: 100,
-            marginTop: 100
-          }}
-        >
-          welcome to clueless.
-        </Text>
-        <View style={styles.logincontainer}>
-          <TextInput
-            style={styles.loginclueless}
-            value={this.state.username}
-            placeholder="wallet id"
-            onChangeText={username => this.setState({ username })}
-          />
-          <TextInput
-            style={styles.loginclueless}
-            value={this.state.password}
-            placeholder="wallet key"
-            secureTextEntry={true}
-            onChangeText={password => this.setState({ password })}
-          />
-          <TextInput
-            style={styles.loginclueless}
-            value={this.state.did}
-            placeholder="your did"
-            onChangeText={did => this.setState({ did })}
-          />
-          <Button
-            title="log in"
-            onPress={this.authenticateWallet}
-            color="#d65b35"
-          ></Button>
-        </View>
-      </View>
-    );
-
-    const qrGeneratorPage = (
-      <View style={styles.container}>
-        <Text>A qr code somewhere</Text>
-        <QRCode value={this.state.qrValue} size={200} />
-      </View>
-    );
-
-    const qrScannerPage = (
-      <View style={styles.container}>
-        <Modal
-          visible={this.state.scanned}
-          onTouchOutside={() => this.setState({ scanned: false })}
-          modalTitle={<ModalTitle title="Enter your master secret id" />}
-          opacity={0.5}
-        >
-          <ModalContent>
-            <TextInput
-              style={{
-                height: 40,
-                borderColor: "gray",
-                borderWidth: 1,
-                textAlign: "center"
-              }}
-              value={this.state.masterSecretID}
-              placeHolder="Charlie"
-              onChangeText={masterSecretID => this.setState({ masterSecretID })}
-            />
-          </ModalContent>
-          <Button title="Verify" onPress={this.getProof}></Button>
-        </Modal>
-
-        <BarCodeScanner
-          onBarCodeScanned={
-            this.state.scanned
-              ? undefined
-              : ({ data }) => {
-                  this.setState({ proofData: data, scanned: true });
-                }
-          }
-          style={StyleSheet.absoluteFillObject}
-        >
-          <Text
-            style={{
-              color: "white",
-              fontWeight: "bold",
-              fontSize: 30,
-              marginTop: 100,
-              textAlign: "center"
-            }}
-          >
-            scan the qr code your verifier gives you.
-          </Text>
-        </BarCodeScanner>
-      </View>
-    );
-
-    if (this.state.showQR) {
-      return qrGeneratorPage;
-    } else if (this.state.showQRScanner) {
-      return qrScannerPage;
-    } else {
-      return loginPage;
+const RootStack = createStackNavigator(
+  {
+    Login: Login,
+    Details: DetailsScreen
+  },
+  {
+    initialRouteName: "Login",
+    defaultNavigationOptions: {
+      headerTransparent: true
     }
   }
-}
+);
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#333",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-    flex: 1
-  },
+const AppContainer = createAppContainer(RootStack);
 
-  loginflex: {
-    height: 100,
-    display: "flex",
-    flex: 0
-    //backgroundimage: url('./../img/login_bg2.jpg'),
-    //backgroundsize: 'cover',
-    //backgroundposition: 'center',
-  },
-
-  leftcolumn: {
-    position: "relative",
-    width: 45,
-    backgroundColor: "rgba(218, 218, 218, 0.699)"
-    //transition: 'all',
-  },
-
-  leftcolumnhover: {
-    backgroundColor: "rgb(235, 240, 241)",
-    width: 50
-  },
-
-  logincontainer: {
-    position: "relative",
-    width: 200,
-    height: 200,
-    backgroundColor: "#333",
-    justifyContent: "center",
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: "#ff0057",
-    marginTop: 200,
-    marginLeft: 100
-  },
-
-  loginclueless: {
-    /* margin: px; */
-    fontFamily: "normal",
-    fontSize: 16,
-    textAlign: "left",
-    flex: 1,
-    color: "#fff"
+export default class App extends React.Component {
+  render() {
+    return <AppContainer />;
   }
-});
-
-export default App;
+}
