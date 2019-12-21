@@ -7,7 +7,7 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 
 class App extends React.Component {
   state = {
-    name: "GcytQUaaFE728WrKitXh63",
+    did: "",
     username: "",
     password: "",
     masterSecretID: "",
@@ -28,7 +28,13 @@ class App extends React.Component {
   };
 
   getProof = async () => {
-    let { password, username, masterSecretID, proofData, name } = this.state;
+    let {
+      password,
+      username,
+      masterSecretID,
+      proofData,
+      did: name
+    } = this.state;
     let proofjson = JSON.parse(proofData);
     let proofType = proofjson.proofType;
     proofType = proofType.trim();
@@ -94,6 +100,12 @@ class App extends React.Component {
             placeholder="wallet key"
             secureTextEntry={true}
             onChangeText={password => this.setState({ password })}
+          />
+          <TextInput
+            style={styles.loginclueless}
+            value={this.state.did}
+            placeholder="your did"
+            onChangeText={did => this.setState({ did })}
           />
           <Button
             title="log in"
