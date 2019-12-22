@@ -10,7 +10,7 @@ class App extends React.Component {
 		masterSecretID: '',
 		username: '',
 		password: '',
-		masterSecretID: '',
+		DID: '',
 		hasCameraPermissions: null,
 		showQRScanner: false,
 		scanned: undefined,
@@ -28,14 +28,13 @@ class App extends React.Component {
 	}
 
 	getProof = async () => {
-		let { password, username, masterSecretID, proofData } = this.state
+		let { password, username, masterSecretID, proofData, DID } = this.state
 		let proofjson = JSON.parse(proofData)
 		let proofType = proofjson.proof
-		const did = 'did'
 		proofType = proofType.trim() //proofType.toString().trim() might work for trimming the whitespace
-		const url = `http://34.244.193.16:8080/credentials-for-default-proof?masterSecretId=
-				${masterSecretID}&proverWalletID=${username}&proverDID=${did}&proof=${proofType}
-        &proverWalletKey=${password}`
+		console.log(proofType + '!')
+		const url = `http://146.169.150.212:8080/credentials-for-default-proof?masterSecretId=${masterSecretID}&proverWalletID=${username}&proverDID=${DID}&proof=${proofType}&proverWalletKey=${password}`
+		console.log(url + '!')
 		await fetch(url)
 			.then(response => response.json())
 			.then(response => {
@@ -50,8 +49,8 @@ class App extends React.Component {
 	}
 
 	authenticateWallet = async () => {
-		let { username, password, masterSecretID } = this.state
-		const url = `http://34.244.193.16:8080/login?id=${username}&key=${password}&did=did&masterDid=${masterSecretID}`
+		let { username, password, masterSecretID, DID } = this.state
+		const url = `http://146.169.150.212:8080/login?id=${username}&key=${password}&did=${DID}&masterDid=${masterSecretID}`
 		await fetch(url)
 			.then(response => response.json())
 			.then(response => {
@@ -93,6 +92,12 @@ class App extends React.Component {
 						placeholder='wallet key'
 						secureTextEntry={true}
 						onChangeText={password => this.setState({ password })}
+					/>
+					<TextInput
+						style={styles.loginclueless}
+						value={this.state.DID}
+						placeholder='your did'
+						onChangeText={DID => this.setState({ DID })}
 					/>
 					<TextInput
 						style={styles.loginclueless}
@@ -141,9 +146,16 @@ class App extends React.Component {
 				</Modal> */}
 
 				<BarCodeScanner
-					onBarCodeScanned={({ data }) => {
-						this.setState({ proofData: data }, this.getProof)
-					}}
+					onBarCodeScanned={
+						this.state.scanned
+							? undefined
+							: ({ data }) => {
+									this.setState(
+										{ proofData: data, scanned: true },
+										this.getProof
+									)
+							  }
+					}
 					style={StyleSheet.absoluteFillObject}
 				>
 					<Text
