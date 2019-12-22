@@ -3,14 +3,16 @@ import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 
 import Login from "./Login";
-import DetailsScreen from "./DetailsScreen.js";
+import QRScanner from "./QRScanner";
+import QRCode from "./QRCode";
 
-/* LOGIN ->  LICENSES -> SCHEMA -> PROOFS -> SHOW QR -> READER */
+/* LOGIN -> READER -> GENERATOR */
 
 const RootStack = createStackNavigator(
   {
     Login: Login,
-    Details: DetailsScreen
+    QRScanner: QRScanner,
+    QRCode: QRCode
   },
   {
     initialRouteName: "Login",
