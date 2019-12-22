@@ -28,21 +28,15 @@ class App extends React.Component {
   };
 
   getProof = async () => {
-    let {
-      password,
-      username,
-      masterSecretID,
-      proofData,
-      did: name
-    } = this.state;
+    let { password, username, masterSecretID, proofData, did } = this.state;
     let proofjson = JSON.parse(proofData);
     let proofType = proofjson.proofType;
-    proofType = proofType.trim();
+    proofType = proofType.trim(); //proofType.toString().trim() might work for trimming the whitespace
     let schemaID = proofjson.schemaID;
     schemaID = schemaID.trim();
-    const url = `http://34.244.72.181:8080/credentials-for-default-proof?masterSecretId=
-				${masterSecretID}&proverWalletID=${username}&proverDID=${name}&proof=${proofType}
-        &proverWalletKey=${password}&schemaId=${schemaID}`;
+    const url = `http://34.244.193.16:8080/credentials-for-default-proof?masterSecretId=
+				${masterSecretID}&proverWalletID=${username}&proverDID=${did}&proof=${proofType}
+        &proverWalletKey=${password}`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
@@ -57,8 +51,8 @@ class App extends React.Component {
   };
 
   authenticateWallet = async () => {
-    let { username, password } = this.state;
-    const url = `http://34.244.72.181:8080/login?id=${username}&key=${password}&did=empty&masterDid=empty`;
+    let { username, password, did } = this.state;
+    const url = `http://34.244.193.16:8080/login?id=${username}&key=${password}&did=${did}&masterDid=empty`;
     await fetch(url)
       .then(response => response.json())
       .then(response => {
